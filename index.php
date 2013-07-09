@@ -1,21 +1,21 @@
 <?php
-if(file_exists("lock"))
-{
-  echo '<meta http-equiv="Refresh" content="0; url=install.php">';
-	exit;
-}
 include('db.php');
 ?>
 <html>
 	<head>
-	<?php include('includes/header.php'); ?>
 	<script type="text/javascript">
-	
-	$(document).ready(function(){
 	var t = 0;
 	var f = 0;
 	var id;
+	var save = 1;
 	var scanname,scanurl;
+	</script>
+	<?php
+	include('includes/header.php'); 
+	
+	?>
+	<script type="text/javascript">	
+	$(document).ready(function(){
 		$("#next").click(function(){
 			if(t === 0)
 			{
@@ -26,7 +26,7 @@ include('db.php');
 				t = 1;
 			}
 			else
-			if(t === 1)
+			if(t == 1)
 			{
 				$("#scantitle").html("Select appropriate options and Click start");
 				$("#scanurl").hide();
@@ -77,7 +77,7 @@ include('db.php');
 					$("#next").show();
 				}
 				else
-				if(data == "nameerror")
+				if(data == "nameerror" && save == 1)
 				{
 					$("#scrape").html("<p style=\"color:red\">Scan Name Already Exists.Please enter a unique scan name</p>");
 					f = 1;
@@ -86,7 +86,7 @@ include('db.php');
 					$("#next").show();
 				}
 				else 
-				if(data == "noaccess")
+				if(data == "noaccess"  && save == 1)
 				{
 					$("#scrape").html("<p style=\"color:red\">We are unable to access the URL entered.Please check again</p>");
 					f = 2;
@@ -129,27 +129,48 @@ include('db.php');
 					$.post( 
 							 "post_handler/getscanid.php",
 							 { name: scanname, url: scanurl },
-							 function(data2) {
+							 function(data2) 
+							 {
 								id = data2;
-					$("#scrape").html("Scan name and URL registered in the database<br />Scanning " + scanurl + " to find server information and other links<br />");
-									$.post( 
-					"post_handler/getservinfo.php",
-					{url: scanurl,pid:id },
-					function(data) {
-						$("#scrape").append("Server: " + data.Server + '<br />');
-						$("#scrape").append("Content-Type: " + data["Content-Type"] + '<br />');
-						if(data.hasOwnProperty("X-Powered-By"))
-						{
-							$("#scrape").append("X-Powered-By: " + data["X-Powered-By"] + '<br />');
-						}
-						$.post( 
-							"scraper.php",
-							{ name: scanname, url: scanurl },
-							function(data) {
-								$("#scrape").append(data + " links found and added to scanning list<br />");
-						 getnextlink();
-							});	
-					},"json");	});					
+								$.post("post_handler/scanpoint.php",{pid:id},function(data){if(data == 0) 
+								{
+									save = 1;	
+								}
+								else
+								{
+									save = 0;
+								}
+								});
+								if(save == 1)
+								{
+	
+									$("#scrape").html("Scan name and URL registered in the database<br />Scanning " + scanurl + " to find server information and other links<br />");
+													$.post( 
+									"post_handler/getservinfo.php",
+									{url: scanurl,pid:id },
+									function(data) {
+										$("#scrape").append("Server: " + data.Server + '<br />');
+										$("#scrape").append("Content-Type: " + data["Content-Type"] + '<br />');
+										if(data.hasOwnProperty("X-Powered-By"))
+										{
+											$("#scrape").append("X-Powered-By: " + data["X-Powered-By"] + '<br />');
+										}
+										$.post( 
+											"scraper.php",
+											{ name: scanname, url: scanurl },
+											function(data) {
+												$("#scrape").append(data + " links found and added to scanning list<br />");
+										 getnextlink();
+											});	
+									},"json");	
+								}
+								else
+								{
+									$("#scrape").append("Resuming the process...");
+									getnextlink();
+								}
+							}
+						);					
 
 
 				}
@@ -183,10 +204,43 @@ include('db.php');
 			{
 				while($f = $q->fetch(PDO::FETCH_ASSOC))
 				{
-					echo '<a href="#" title="'.$f['url'].'">'.$f['name'].'</a><br />';
+					$teid = base_convert($f['id'],10,16);
+					echo '<a href="?scanid='.$teid.'" title="'.$f['url'].'">'.$f['name'].'</a><br />';
 				}
 			}
 		?>
 		</div>
+		<?php
+		if(isset($_GET['scanid']))
+		{
+			$id = $_GET['scanid'];
+			$id = base_convert($id,16,10);
+			$q = $db->prepare("SELECT * FROM scan WHERE id = ?");
+			$q->execute(array($id));
+			if($q->rowCount() != 0)
+			{
+				while($f = $q->fetch(PDO::FETCH_ASSOC))
+				{
+					?>
+					<script type="text/javascript">
+					$(document).ready(function(){
+					id = <?php echo $id ?>;
+					scanname = "<?php echo $f['name']; ?>";
+					$("#scanname").val(scanname);
+					scanurl = "<?php echo $f['url'] ?>";
+					$("#url").val(scanurl);					
+					$('#next').trigger('click');
+					$("#scanname").hide();
+					$("#scanurl").show();
+					save = 0;
+					$('#next').trigger('click');
+					$("#scanoptions").append("<br />Current Scan Name : " + scanname + "<br />Current Scan URL : " + scanurl);
+					});
+					</script>
+					<?php
+				}			
+			}
+		}
+		?>
 	</body>
 </html>
