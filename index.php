@@ -219,7 +219,7 @@ include('db.php');
 			{
 				while($f = $q->fetch(PDO::FETCH_ASSOC))
 				{
-					$teid = base_convert($f['id'],10,16);
+					$teid = $f['id'];
 					echo '<a href="?scanid='.$teid.'" title="'.$f['url'].'">'.$f['name'].'</a><br />';
 				}
 			}
@@ -229,7 +229,6 @@ include('db.php');
 		if(isset($_GET['scanid']))
 		{
 			$id = $_GET['scanid'];
-			$id = base_convert($id,16,10);
 			$q = $db->prepare("SELECT * FROM scan WHERE id = ?");
 			$q->execute(array($id));
 			if($q->rowCount() != 0)
