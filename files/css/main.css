@@ -1,0 +1,67 @@
+#logo
+{
+  text-align:center;
+}
+body
+{
+	background-color:black;
+	color:#ffffff;
+}
+#clear
+{
+	height:20px;
+}
+#main
+{
+	text-align:center;
+	width:75%;
+	float:left;
+	border-style:solid;
+	border-width:3px;
+	border-color:#ffffff;
+}
+#sidebar
+{
+	width:24%;
+	float:right;
+	border-style:solid;
+	border-width:3px;
+	border-color:#ffffff;
+	text-align:center;
+}
+#sidebar a
+{
+	text-decoration:none;
+	color:#ffffff;
+}
+#sidebar a:hover
+{
+	text-decoration:none;
+	color:#ffffff;	
+}
+#sidebar a:active
+{
+	text-decoration:none;
+	color:#ffffff;
+}
+#install
+{
+	width:75%;
+	height:300px;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:center;
+	border-style:solid;
+	border-width:3px;
+	padding:4px;
+	color:#ffffff;
+	border-color:#ffffff;
+}
+#scanoptions
+{
+	display:none;
+}
+#scanurl
+{
+	display:none;
+}
