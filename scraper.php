@@ -1,6 +1,6 @@
 <?php
 include('db.php');
-  include('dom.php');
+	include('dom.php');
 if(isset($_POST['name']) && isset($_POST['url']))
 {
 	$url = $_POST['url'];
@@ -70,6 +70,8 @@ if(isset($_POST['name']) && isset($_POST['url']))
 			$count++;
 		}
 	}
+	$q = $db->prepare("UPDATE scan SET started=1 WHERE id=?");
+	$q->execute(array($id));
 	echo $count;
 }
 else
