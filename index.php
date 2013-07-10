@@ -129,13 +129,12 @@ include('db.php');
 								 var tmp,tid,turl;
 								 tmp = data3.split("id@sep#sep");
 								 tid = tmp[0];
-								 turl = tmp[1];
-								 $("#scrape").append("Scanning " + turl + " to find other links<br />");	
+								 turl = tmp[1];							
 									  $.post( 
 									 "scraper.php",
 									 {tempid:tid},
-									 function(data4) {
-										$("#scrape").append(data4 + " links found and added to scanning list<br />");
+									 function(data4) {$("#scrape").html("Current Process: Crawling<br />Current URL: " + turl + "<br />");
+												$("#scrape").append("Links Found: " + data4);
 										getnextlink();
 									 });							 
 								 });
@@ -160,15 +159,17 @@ include('db.php');
 								if(save == 1)
 								{	
 									$("#scanstatus").show();
-									$("#scanstatus").append("<center><br /><h3>Scan Status</h3><table id=\"status\"><tr><td>Scan Name: </td><td>" + scanname + "</td></tr><tr><td>URL:</td><td>" + scanurl + "</td></tr></table></center>");
+									$("#scanstatus").append("<center><br /><h3>Scan Status</h3>&#10004;<table id=\"status\"><tr><td>Scan Name: </td><td>" + scanname + "</td></tr><tr><td>URL:</td><td>" + scanurl + "</td></tr></table></center>");
 									$("#scrape").html("Scan name and URL registered in the database<br />Scanning " + scanurl + " to find server information and other links<br />");
 													$.post( 
 									"post_handler/getservinfo.php",
 									{url: scanurl,pid:id },
 									function(data) {
-										
-										$("#scrape").append("Server: " + data.Server + '<br />');
-										$("#status tr:last").after("<tr><td>Server: </td><td>" + data.Server + "</td></tr>");
+										if(data.hasOwnProperty("Server"))
+										{
+											$("#scrape").append("Server: " + data.Server + '<br />');
+											$("#status tr:last").after("<tr><td>Server: </td><td>" + data.Server + "</td></tr>");
+										}
 										$("#scrape").append("Content-Type: " + data["Content-Type"] + '<br />');
 										$("#status tr:last").after("<tr><td>Content-Type: </td><td>" + data["Content-Type"] + "</td></tr>");
 										if(data.hasOwnProperty("X-Powered-By"))
@@ -176,11 +177,12 @@ include('db.php');
 											$("#scrape").append("X-Powered-By: " + data["X-Powered-By"] + '<br />');
 											$("#status tr:last").after("<tr><td>X-Powered-By: </td><td>" + data["X-Powered-By"] + "</td></tr>");
 										}
+										$("#scrape").html("Current Process: Crawling<br />Current URL: " + scanurl + "<br />");
 										$.post( 
 											"scraper.php",
 											{ name: scanname, url: scanurl },
 											function(data) {
-												$("#scrape").append(data + " links found and added to scanning list<br />");
+												$("#scrape").append("Links Found: " + data);
 										 getnextlink();
 											});	
 									},"json");	
@@ -264,9 +266,15 @@ include('db.php');
 					$("#scanname").val(scanname);
 					scanurl = "<?php echo $f['url'] ?>";
 					$("#scanstatus").append("<center><br /><h3>Scan Status</h3><table id=\"status\"><tr><td>Scan Name: </td><td>" + scanname + "</td></tr><tr><td>URL:</td><td>" + scanurl + "</td></tr></table></center>");
-					$("#status tr:last").after("<tr><td>Server: </td><td>" + "<?php echo $server ?>" + "</td></tr>");
+					if("<?php echo $server ?>" != NULL)
+					{
+						$("#status tr:last").after("<tr><td>Server: </td><td>" + "<?php echo $server ?>" + "</td></tr>");
+					}
 					$("#status tr:last").after("<tr><td>Content: </td><td>" + "<?php echo $content ?>" + "</td></tr>");
-					$("#status tr:last").after("<tr><td>Language: </td><td>" + "<?php echo $lang ?>" + "</td></tr>");
+					if("<?php echo $lang ?>" != NULL)
+					{
+						$("#status tr:last").after("<tr><td>Language: </td><td>" + "<?php echo $lang ?>" + "</td></tr>");
+					}	
 					$("#scanstatus").show();
 					$("#url").val(scanurl);					
 					$('#next').trigger('click');
