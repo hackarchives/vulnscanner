@@ -31,6 +31,15 @@ include('db.php');
 	?>
 	<script type="text/javascript">	
 	$(document).ready(function(){
+	function updateavailablelinks()
+		{
+				$.post("post_handler/updatelinkstat.php",{pid:id},
+				function(data)
+				{
+					$("#tlinks").html("<td>Total Links: </td><td>" + data + "</td>");
+				}
+			);
+		}
 		$("#next").click(function(){
 			if(t === 0)
 			{
@@ -135,6 +144,7 @@ include('db.php');
 									 {tempid:tid},
 									 function(data4) {$("#scrape").html("Current Process: Crawling<br />Current URL: " + turl + "<br />");
 												$("#scrape").append("Links Found: " + data4);
+												updateavailablelinks();
 										getnextlink();
 									 });							 
 								 });
@@ -177,12 +187,14 @@ include('db.php');
 											$("#scrape").append("X-Powered-By: " + data["X-Powered-By"] + '<br />');
 											$("#status tr:last").after("<tr><td>X-Powered-By: </td><td>" + data["X-Powered-By"] + "</td></tr>");
 										}
+										$("#status tr:last").after("<tr id=\"tlinks\"></tr>");
 										$("#scrape").html("Current Process: Crawling<br />Current URL: " + scanurl + "<br />");
 										$.post( 
 											"scraper.php",
 											{ name: scanname, url: scanurl },
 											function(data) {
 												$("#scrape").append("Links Found: " + data);
+												updateavailablelinks();
 										 getnextlink();
 											});	
 									},"json");	
@@ -259,22 +271,33 @@ include('db.php');
 						}
 					}
 					?>
-					<script type="text/javascript">
+					<script type="text/javascript">				
 					$(document).ready(function(){
+						function updateavailablelinks()
+						{
+								$.post("post_handler/updatelinkstat.php",{pid:id},
+								function(data)
+								{
+									$("#tlinks").html("<td>Total Links: </td><td>" + data + "</td>");
+								}
+							);
+						}
 					id = <?php echo $id ?>;
 					scanname = "<?php echo $f['name']; ?>";
 					$("#scanname").val(scanname);
 					scanurl = "<?php echo $f['url'] ?>";
 					$("#scanstatus").append("<center><br /><h3>Scan Status</h3><table id=\"status\"><tr><td>Scan Name: </td><td>" + scanname + "</td></tr><tr><td>URL:</td><td>" + scanurl + "</td></tr></table></center>");
-					if("<?php echo $server ?>" != NULL)
+					if("<?php echo $server ?>" != "NULL")
 					{
 						$("#status tr:last").after("<tr><td>Server: </td><td>" + "<?php echo $server ?>" + "</td></tr>");
 					}
 					$("#status tr:last").after("<tr><td>Content: </td><td>" + "<?php echo $content ?>" + "</td></tr>");
-					if("<?php echo $lang ?>" != NULL)
+					if("<?php echo $lang ?>" != "NULL")
 					{
 						$("#status tr:last").after("<tr><td>Language: </td><td>" + "<?php echo $lang ?>" + "</td></tr>");
-					}	
+					}
+					$("#status tr:last").after("<tr id=\"tlinks\"></tr>");
+					updateavailablelinks();
 					$("#scanstatus").show();
 					$("#url").val(scanurl);					
 					$('#next').trigger('click');
