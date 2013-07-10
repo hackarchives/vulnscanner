@@ -7,10 +7,12 @@ Vulerability Scanner Coded in PHP<br />
 
 <b>Features Added:</b><br />
 Crawler<br />
-Getting Header Information<br /><br />
+Getting Header Information<br />
+Saving and Resuming Scans<br />
+<br />
 
 <b>Upcoming Features:</b><br />
-Using already saved scans<br />
+<Strike>Using already saved scans</strike><br />
 SQLi Test<br />
 XSS Test<br />
 CSRF Test<br />
