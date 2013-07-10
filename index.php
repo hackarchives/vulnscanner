@@ -123,6 +123,7 @@ include('db.php');
 								 function(data3) {
 								 if(data3 == 0)
 								 {
+									$("#scrape").append("Crawling process Completed.<br />Initiating Scan For SQL Injections<br />");
 									return;
 								 }
 								 var tmp,tid,turl;
@@ -157,18 +158,23 @@ include('db.php');
 								}
 								});
 								if(save == 1)
-								{
-	
+								{	
+									$("#scanstatus").show();
+									$("#scanstatus").append("<center><br /><h3>Scan Status</h3><table id=\"status\"><tr><td>Scan Name: </td><td>" + scanname + "</td></tr><tr><td>URL:</td><td>" + scanurl + "</td></tr></table></center>");
 									$("#scrape").html("Scan name and URL registered in the database<br />Scanning " + scanurl + " to find server information and other links<br />");
 													$.post( 
 									"post_handler/getservinfo.php",
 									{url: scanurl,pid:id },
 									function(data) {
+										
 										$("#scrape").append("Server: " + data.Server + '<br />');
+										$("#status tr:last").after("<tr><td>Server: </td><td>" + data.Server + "</td></tr>");
 										$("#scrape").append("Content-Type: " + data["Content-Type"] + '<br />');
+										$("#status tr:last").after("<tr><td>Content-Type: </td><td>" + data["Content-Type"] + "</td></tr>");
 										if(data.hasOwnProperty("X-Powered-By"))
 										{
 											$("#scrape").append("X-Powered-By: " + data["X-Powered-By"] + '<br />');
+											$("#status tr:last").after("<tr><td>X-Powered-By: </td><td>" + data["X-Powered-By"] + "</td></tr>");
 										}
 										$.post( 
 											"scraper.php",
@@ -206,7 +212,9 @@ include('db.php');
 		<br /><br /><input type="button" value="Next" id="next">
 		
 		</div>
-		<div id="sidebar">
+		
+		<div id="sidebar"><div id="scanstatus">
+		</div>
 		<h3>Recent Scans</h3><br />
 		<?php
 			$q = $db->prepare("SELECT * FROM scan ORDER BY id DESC LIMIT 10");
@@ -235,6 +243,19 @@ include('db.php');
 			{
 				while($f = $q->fetch(PDO::FETCH_ASSOC))
 				{
+					$q2 = $db->prepare("SELECT * FROM scaninfo WHERE pid=?");
+					$q2->execute(array($id));
+					if($q2->rowCount() != 0)
+					{
+						while($f2 = $q2->fetch(PDO::FETCH_ASSOC))
+						{
+							$server = $f2['server'];
+							$date = $f2['date'];
+							$time = $f2['time'];
+							$content = $f2['content'];
+							$lang = $f2['lang'];
+						}
+					}
 					?>
 					<script type="text/javascript">
 					$(document).ready(function(){
@@ -242,6 +263,11 @@ include('db.php');
 					scanname = "<?php echo $f['name']; ?>";
 					$("#scanname").val(scanname);
 					scanurl = "<?php echo $f['url'] ?>";
+					$("#scanstatus").append("<center><br /><h3>Scan Status</h3><table id=\"status\"><tr><td>Scan Name: </td><td>" + scanname + "</td></tr><tr><td>URL:</td><td>" + scanurl + "</td></tr></table></center>");
+					$("#status tr:last").after("<tr><td>Server: </td><td>" + "<?php echo $server ?>" + "</td></tr>");
+					$("#status tr:last").after("<tr><td>Content: </td><td>" + "<?php echo $content ?>" + "</td></tr>");
+					$("#status tr:last").after("<tr><td>Language: </td><td>" + "<?php echo $lang ?>" + "</td></tr>");
+					$("#scanstatus").show();
 					$("#url").val(scanurl);					
 					$('#next').trigger('click');
 					$("#scanname").hide();
