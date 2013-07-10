@@ -12,7 +12,6 @@ Saving and Resuming Scans<br />
 <br />
 
 <b>Upcoming Features:</b><br />
-<Strike>Using already saved scans</strike><br />
 SQLi Test<br />
 XSS Test<br />
 CSRF Test<br />
